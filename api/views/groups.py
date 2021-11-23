@@ -9,6 +9,7 @@ from api.models import Chat, DirectChat, MemberOf, Message, DirectMessage
 from django.contrib.gis.geos import Point
 from itertools import chain
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 @api_view(['GET'])
 def active_chats(request):
@@ -19,22 +20,30 @@ def active_chats(request):
     
     active_chats = Chat.objects.filter(polygon__covers=current_location)
     if request.user.is_authenticated:
-        active_dm1 = DirectChat.objects.filter(user1=request.user)
-        active_dm2 = DirectChat.objects.filter(user2=request.user)
+        active_direct_chats = DirectChat.objects.filter(Q(user1=user) | Q(user2=user))
     else:
-        active_dm1 = []
-        active_dm2 = []
+        active_direct_chats = []
     
     return_data = {}
     return_data["active_chats"] = []
     for chat in active_chats:
         try:
-            if chat.password:
+            if request.user.is_authenticated:
+                MemberOf.objects.get(chat=chat, user=request.user)
+                has_password_view_permission = True
+        except:
+            has_password_view_permission = False
+
+        try:
+            if chat.password and not has_password_view_permission:
                 recent_message_content = None
                 recent_message_timestamp = None
             else:
                 recent_message = Message.objects.latest('timestamp')
-                recent_message_content = recent_message.content
+                if recent_message.file:
+                    recent_message = "FILE"
+                else:
+                    recent_message_content = recent_message.content
                 recent_message_timestamp = recent_message.timestamp
         except:
             recent_message_content = None
@@ -48,7 +57,7 @@ def active_chats(request):
         }
         return_data["active_chats"].append(x)
     
-    for chat in list(chain(active_dm1, active_dm2)):
+    for chat in active_direct_chats:
         try:
             recent_message = DirectMessage.objects.latest('timestamp')
             recent_message_content = recent_message.content
@@ -79,18 +88,23 @@ def chat_info(request):
         Response(status=status.HTTP_400_BAD_REQUEST)
     
     chat = get_object_or_404(Chat, chat_id=chat_id)
+    try:
+        MemberOf.objects.get(chat=chat, user=request.user)
+    except:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    
     user_query = MemberOf.objects.filter(chat=chat)
     user_list = []
     for member in user_query:
-        if member == chat.owner:
+        if member.user == chat.owner:
             admin = True
         else:
             admin = False
         x = {
-            "username": member.username,
-            "first_name": member.first_name,
-            "last_name": member.last_name,
-            "profile_pic": member.profile_pic.url,
+            "username": member.user.username,
+            "first_name": member.user.first_name,
+            "last_name": member.user.last_name,
+            "profile_pic": member.user.profile_pic.url,
             "admin": admin
         }
         user_list.append(x)

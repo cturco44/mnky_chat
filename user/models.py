@@ -6,6 +6,11 @@ from django.contrib.auth.models import (
 )
 from django.db.models.deletion import PROTECT
 from django.db.models.fields import CharField
+import uuid
+from django.dispatch import receiver
+
+def unique_id():
+    return uuid.uuid4().hex[:8].lower()
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, username, first_name, last_name, password, profile_pic):
@@ -36,7 +41,8 @@ class MyUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    
+
+
 
 class User(AbstractBaseUser, PermissionsMixin):
 
@@ -45,6 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=255,
         unique=True,
     )
+    user_id = models.CharField(primary_key=False, default=unique_id, max_length=10, editable=False, unique=True)
     username = CharField(max_length=25, unique=True)
     first_name = CharField(max_length=70)
     last_name = CharField(max_length=70)
@@ -93,3 +100,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     def is_superuser(self):
         "Is the user a admin member?"
         return self.admin
+
+@receiver(models.signals.post_save, sender=User)
+def save_uuid(sender, instance, **kwargs):
+    while User.objects.filter(user_id=instance.user_id).exists():
+        instance.user_id = unique_id()
+    
