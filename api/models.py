@@ -53,7 +53,7 @@ class Message(models.Model):
     chat = models.ForeignKey(Chat, on_delete=CASCADE)
     sender = models.ForeignKey(User, on_delete=CASCADE)
     content = models.TextField()
-    file = models.FileField(null=True)
+    file = models.FileField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     
     def save(self, *args, **kwargs):
@@ -66,7 +66,7 @@ class DirectMessage(models.Model):
     chat = models.ForeignKey(DirectChat, on_delete=CASCADE)
     sender = models.ForeignKey(User, on_delete=CASCADE, related_name='sender')
     content = models.TextField()
-    file = models.FileField(null=True)
+    file = models.FileField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):

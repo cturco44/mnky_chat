@@ -20,7 +20,7 @@ def active_chats(request):
     
     active_chats = Chat.objects.filter(polygon__covers=current_location)
     if request.user.is_authenticated:
-        active_direct_chats = DirectChat.objects.filter(Q(user1=user) | Q(user2=user))
+        active_direct_chats = DirectChat.objects.filter(Q(user1=request.user) | Q(user2=request.user))
     else:
         active_direct_chats = []
     
@@ -39,7 +39,7 @@ def active_chats(request):
                 recent_message_content = None
                 recent_message_timestamp = None
             else:
-                recent_message = Message.objects.latest('timestamp')
+                recent_message = Message.objects.filter(chat=chat, timestamp__isnull=False).latest('timestamp')
                 if recent_message.file:
                     recent_message = "FILE"
                 else:
@@ -51,6 +51,7 @@ def active_chats(request):
         
         x = {
             "chat_id": chat.chat_id,
+            "name": chat.name,
             "description": chat.description,
             "recent_message_content": recent_message_content,
             "recent_message_timestamp": recent_message_timestamp
@@ -65,16 +66,21 @@ def active_chats(request):
         except:
             recent_message_content = None
             recent_message_timestamp = None
-        
+        if chat.user1 == request.user:
+            other_user = chat.user2
+        else:
+            other_user = chat.user1
         x = {
             "chat_id": chat.chat_id,
-            "description": chat.description,
+            "first_name": other_user.first_name,
+            "last_name": other_user.last_name,
+            "username": other_user.username,
             "recent_message_content": recent_message_content,
             "recent_message_timestamp": recent_message_timestamp
         }
         return_data["active_chats"].append(x)
     
-    return_data["active_chats"] = sorted(return_data["active_chats"], lambda x: x.recent_message_timestamp)
+    return_data["active_chats"] = sorted(return_data["active_chats"], key=lambda x: (x['recent_message_timestamp'] is None, x['recent_message_timestamp']), reverse=True)
 
     return Response(return_data, status.HTTP_200_OK)
 
