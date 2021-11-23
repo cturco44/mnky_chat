@@ -30,15 +30,51 @@ def unique_id():
 class Chat(models.Model):
     chat_id = models.CharField(primary_key=False, default=unique_id, max_length=10, editable=False, unique=True)
     name = models.CharField(max_length=40)
-    desciption = models.TextField()
+    description = models.TextField()
     owner = models.ForeignKey(User, on_delete=CASCADE, null=True)
-    location = models.PointField(geography=True)
-    radius = models.IntegerField(default=1)
+    location = models.PointField(geography=True, default=Point(0,0))
+    radius = models.FloatField(default=5)
+    polygon = models.PolygonField(geography=True, null=True)
+    password = models.CharField(max_length=50, null=True)
+    image = models.ImageField(null=True)
 
     def save(self, *args, **kwargs):
-        while Chat.objects.filter(team_id=self.team_id).exists() and self.pk is None:
+        while Chat.objects.filter(chat_id=self.chat_id).exists() and self.pk is None and DirectChat.objects.filter(chat_id=self.chat_id):
             self.team_id = unique_id()
         super(Chat, self).save(*args, **kwargs)
     
     def __str__(self):
         return self.name
+
+class DirectChat(models.Model):
+    chat_id = models.CharField(primary_key=False, default=unique_id, max_length=10, editable=False, unique=True)
+    user1 = models.ForeignKey(User, on_delete=CASCADE, null=True, related_name='user1')
+    user2 = models.ForeignKey(User, on_delete=CASCADE, null=True, related_name='user2')
+
+    def save(self, *args, **kwargs):
+        while Chat.objects.filter(chat_id=self.chat_id).exists() and self.pk is None and DirectChat.objects.filter(chat_id=self.chat_id).exists():
+            self.team_id = unique_id()
+        super(Chat, self).save(*args, **kwargs)
+    
+    def __str__(self):
+        return self.user1.name + " " + self.user2.name
+
+class MemberOf(models.Model):
+    chat = models.ForeignKey(Chat, on_delete=CASCADE)
+    user = models.ForeignKey(User, on_delete=CASCADE)
+
+    def __str__(self):
+        return self.user.username + " " + self.chat.name
+
+class Message(models.Model):
+    chat = models.ForeignKey(Chat, on_delete=CASCADE)
+    user = models.ForeignKey(User, on_delete=CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+class DirectMessage(models.Model):
+    chat = models.ForeignKey(DirectChat, on_delete=CASCADE)
+    sender = models.ForeignKey(User, on_delete=CASCADE, related_name='sender')
+    reciever = models.ForeignKey(User, on_delete=CASCADE, related_name='reciever')
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)

@@ -16,9 +16,12 @@ Including another URLconf
 from rest_framework.authtoken import views
 from django.urls import path
 from .views.signup import sign_up
+from .views.groups import *
 
 urlpatterns = [
     path('login/', views.obtain_auth_token),
     path('signup/', sign_up),
-    
+    path('active-chats/', active_chats),
+    path('chat-info/', chat_info),
+    path('chat/', create_chat),
 ]
