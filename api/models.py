@@ -1,92 +1,44 @@
-from django.db import models
+from django.db.models.deletion import CASCADE
+from user.models import User
+from django.contrib.gis.db import models
+from django.contrib.gis.geos import Point
 
-from django.db import models
-from django.contrib.auth.models import (
-    BaseUserManager, AbstractBaseUser
-)
-from django.db.models.deletion import PROTECT
-from django.db.models.fields import CharField
+import uuid
 
-class MyUserManager(BaseUserManager):
-    def create_user(self, email, username, first_name, last_name, password):
-        if not email:
-            raise ValueError("Email Required")
-        if not first_name:
-            raise ValueError("First Name Required")
-        if not last_name:
-            raise ValueError("Last Name Required")
-        
-        
-        user = self.model(
-            email=self.normalize_email(email),
-            first_name=first_name,
-            last_name=last_name,
-            username=username,
-        )
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
+# ID Generation
+def unique_id():
+    return uuid.uuid4().hex[:8].lower()
+
+# class EventType(models.Model):
+#     SELECT = 'S'
+#     GA= 'GA'
+#     GA_SECTION = 'GAS'
+#     EVENT_TYPES = [
+#         (SELECT, 'Select Seats'),
+#         (GA, 'General Admission'),
+#         (GA_SECTION, 'GA with Section Select'),
+#     ]
+#     school = models.ForeignKey(School, on_delete=CASCADE)
+#     sport = models.ForeignKey(Sport, on_delete=CASCADE)
+#     event_type = models.CharField(max_length=3, choices=EVENT_TYPES, default=SELECT)
+#     thumbnail = models.URLField(max_length=200, blank=True, null=True)
+#     header = models.URLField(max_length=200, blank=True, null=True)
     
-    def create_superuser(self, email, username, first_name, last_name, password):
-        user = self.create_user(email, username, first_name, last_name, password)
-        user.admin = True
-        user.staff = True
-        user.superuser = True
-        user.save(using=self._db)
-        return user
+#     def __str__(self):
+#         return self.school.name + " " + self.sport.name
 
+class Chat(models.Model):
+    chat_id = models.CharField(primary_key=False, default=unique_id, max_length=10, editable=False, unique=True)
+    name = models.CharField(max_length=40)
+    desciption = models.TextField()
+    owner = models.ForeignKey(User, on_delete=CASCADE, null=True)
+    location = models.PointField(geography=True)
+    radius = models.IntegerField(default=1)
+
+    def save(self, *args, **kwargs):
+        while Chat.objects.filter(team_id=self.team_id).exists() and self.pk is None:
+            self.team_id = unique_id()
+        super(Chat, self).save(*args, **kwargs)
     
-
-class User(AbstractBaseUser):
-
-    email = models.EmailField(
-        verbose_name='email address',
-        max_length=255,
-        unique=True,
-    )
-    first_name = CharField(max_length=70)
-    last_name = CharField(max_length=70)
-
-    
-    date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
-    
-    staff = models.BooleanField(default=False) # a admin user; non super-user
-    admin = models.BooleanField(default=False) # a superuser
-    superuser = models.BooleanField(default=False)
-
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'username', 'email'] # Email & Password are required by default.
-
-    objects = MyUserManager()
-    def get_full_name(self):
-        # The user is identified by their email address
-        return self.first_name + self.last_name
-
-    def get_short_name(self):
-        # The user is identified by their email address
-        return self.email
-
     def __str__(self):
-        return self.username
-
-    def has_perm(self, perm, obj=None):
-        "Does the user have a specific permission?"
-        return self.is_admin
-
-    def has_module_perms(self, app_label):
-        return True
-
-    @property
-    def is_staff(self):
-        "Is the user a member of staff?"
-        return self.staff
-
-    @property
-    def is_admin(self):
-        "Is the user a admin member?"
-        return self.admin
-    
-    @property
-    def is_superuser(self):
-        "Is the user a admin member?"
-        return self.admin
+        return self.name

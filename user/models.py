@@ -8,7 +8,7 @@ from django.db.models.deletion import PROTECT
 from django.db.models.fields import CharField
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email, username, first_name, last_name, password):
+    def create_user(self, email, username, first_name, last_name, password, profile_pic):
         if not email:
             raise ValueError("Email Required")
         if not first_name:
@@ -22,6 +22,7 @@ class MyUserManager(BaseUserManager):
             first_name=first_name,
             last_name=last_name,
             username=username,
+            profile_pic=profile_pic,
         )
         user.set_password(password)
         user.save(using=self._db)
@@ -47,6 +48,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = CharField(max_length=25, unique=True)
     first_name = CharField(max_length=70)
     last_name = CharField(max_length=70)
+    profile_pic = models.ImageField(null=True)
 
     
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
