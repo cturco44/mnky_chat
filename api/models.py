@@ -9,24 +9,6 @@ import uuid
 def unique_id():
     return uuid.uuid4().hex[:8].lower()
 
-# class EventType(models.Model):
-#     SELECT = 'S'
-#     GA= 'GA'
-#     GA_SECTION = 'GAS'
-#     EVENT_TYPES = [
-#         (SELECT, 'Select Seats'),
-#         (GA, 'General Admission'),
-#         (GA_SECTION, 'GA with Section Select'),
-#     ]
-#     school = models.ForeignKey(School, on_delete=CASCADE)
-#     sport = models.ForeignKey(Sport, on_delete=CASCADE)
-#     event_type = models.CharField(max_length=3, choices=EVENT_TYPES, default=SELECT)
-#     thumbnail = models.URLField(max_length=200, blank=True, null=True)
-#     header = models.URLField(max_length=200, blank=True, null=True)
-    
-#     def __str__(self):
-#         return self.school.name + " " + self.sport.name
-
 class Chat(models.Model):
     chat_id = models.CharField(primary_key=False, default=unique_id, max_length=10, editable=False, unique=True)
     name = models.CharField(max_length=40)
@@ -40,7 +22,7 @@ class Chat(models.Model):
 
     def save(self, *args, **kwargs):
         while Chat.objects.filter(chat_id=self.chat_id).exists() and self.pk is None and DirectChat.objects.filter(chat_id=self.chat_id):
-            self.team_id = unique_id()
+            self.chat_id = unique_id()
         super(Chat, self).save(*args, **kwargs)
     
     def __str__(self):
@@ -53,7 +35,7 @@ class DirectChat(models.Model):
 
     def save(self, *args, **kwargs):
         while Chat.objects.filter(chat_id=self.chat_id).exists() and self.pk is None and DirectChat.objects.filter(chat_id=self.chat_id).exists():
-            self.team_id = unique_id()
+            self.chat_id = unique_id()
         super(Chat, self).save(*args, **kwargs)
     
     def __str__(self):
@@ -67,14 +49,39 @@ class MemberOf(models.Model):
         return self.user.username + " " + self.chat.name
 
 class Message(models.Model):
+    message_id = models.CharField(primary_key=False, default=unique_id, max_length=10, editable=False, unique=True)
     chat = models.ForeignKey(Chat, on_delete=CASCADE)
-    user = models.ForeignKey(User, on_delete=CASCADE)
+    sender = models.ForeignKey(User, on_delete=CASCADE)
     content = models.TextField()
+    file = models.FileField(null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        while Message.objects.filter(message_id=self.message_id).exists() and self.pk is None and DirectMessage.objects.filter(message_id=self.message_id):
+            self.message_id = unique_id()
+        super(Chat, self).save(*args, **kwargs)
 
 class DirectMessage(models.Model):
+    message_id = models.CharField(primary_key=False, default=unique_id, max_length=10, editable=False, unique=True)
     chat = models.ForeignKey(DirectChat, on_delete=CASCADE)
     sender = models.ForeignKey(User, on_delete=CASCADE, related_name='sender')
-    reciever = models.ForeignKey(User, on_delete=CASCADE, related_name='reciever')
     content = models.TextField()
+    file = models.FileField(null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        while Message.objects.filter(message_id=self.message_id).exists() and self.pk is None and DirectMessage.objects.filter(message_id=self.message_id):
+            self.message_id = unique_id()
+        super(Chat, self).save(*args, **kwargs)
+
+class MessageLike(models.Model):
+    message = models.ForeignKey(Message, on_delete=CASCADE)
+    user = models.ForeignKey(User, on_delete=CASCADE)
+    class Meta:
+        unique_together = ('message', 'user',)
+
+class DirectMessageLike(models.Model):
+    message = models.ForeignKey(DirectMessage, on_delete=CASCADE)
+    user = models.ForeignKey(User, on_delete=CASCADE)
+    class Meta:
+        unique_together = ('message', 'user',)

@@ -13,11 +13,11 @@ from django.shortcuts import get_object_or_404
 @api_view(['GET'])
 def active_chats(request):
     try:
-        current_location = Point(request.data['long'], request.data['lat'])
+        current_location = Point(float(request.data['long']), float(request.data['lat']), srid=4326)
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
-    active_chats = Chat.objects.filter(polygon__contains=current_location)
+    active_chats = Chat.objects.filter(polygon__covers=current_location)
     if request.user.is_authenticated:
         active_dm1 = DirectChat.objects.filter(user1=request.user)
         active_dm2 = DirectChat.objects.filter(user2=request.user)
