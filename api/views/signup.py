@@ -15,17 +15,17 @@ def sign_up(request):
         if item not in request.data:
             return Response(status=status.HTTP_400_BAD_REQUEST)
     
-    # try:
-    user = User.objects.create_user(
-        email=request.data["email"],
-        username=request.data["username"],
-        password=request.data["password"],
-        first_name=request.data["first_name"],
-        last_name=request.data["last_name"],
-        profile_pic=request.data["profile_pic"],
-        )
-    # except:
-    #     return Response(status=status.HTTP_400_BAD_REQUEST)
+    try:
+        user = User.objects.create_user(
+            email=request.data["email"],
+            username=request.data["username"],
+            password=request.data["password"],
+            first_name=request.data["first_name"],
+            last_name=request.data["last_name"],
+            profile_pic=request.data["profile_pic"],
+            )
+    except:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
     
     token = Token.objects.get_or_create(user=user)[0].key
     return Response({"token": token}, status.HTTP_200_OK)
