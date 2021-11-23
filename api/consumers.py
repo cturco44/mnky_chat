@@ -63,11 +63,12 @@ class ChatConsumer(WebsocketConsumer):
             return
         self.update()
 
-        text_data_json = json.loads(text_data)
-        data = text_data_json['message']
+        data = json.loads(text_data)
 
         if data['type'] == 'chat_message':
             type, chat = get_chat(data['chat_id'])
+            if data['chat_id'] not in self.joined_chat_ids:
+                return
             if type == "Chat":
                 msg = Message.objects.create(
                     chat=chat, 
@@ -97,6 +98,8 @@ class ChatConsumer(WebsocketConsumer):
         elif data['type'] == 'file_message':
             type, msg = get_message(data['message_id'])
             chat = msg.chat
+            if chat.chat_id not in self.joined_chat_ids:
+                return
             async_to_sync(self.channel_layer.group_send)(
                 chat.chat_id,
                 {
@@ -111,6 +114,8 @@ class ChatConsumer(WebsocketConsumer):
             )
         elif data['type'] == 'like_message':
             type, msg = get_message(data['message_id'])
+            if msg.chat.chat_id not in self.joined_chat_ids:
+                return
             if type == "Message":
                 like = MessageLike.objects.create(message=msg, user=self.scope['user'])
             elif type == "DirectMessage":
@@ -119,7 +124,7 @@ class ChatConsumer(WebsocketConsumer):
             async_to_sync(self.channel_layer.group_send)(
                 like.message.chat.chat_id,
                 {
-                    'type': 'file_message',
+                    'type': 'like_message',
                     'chat_id': like.message.chat.chat_id,
                     'message_id': like.message.message_id,
                     'sender_first_name': like.user.first_name,
