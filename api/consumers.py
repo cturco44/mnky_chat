@@ -91,6 +91,7 @@ class ChatConsumer(WebsocketConsumer):
                     'username': msg.sender.username,
                     'profile_pic': msg.sender.profile_pic.url,
                     'content': msg.content,
+                    'timestamp': str(msg.timestamp)
                 }
             )
         elif data['type'] == 'update':
@@ -105,11 +106,13 @@ class ChatConsumer(WebsocketConsumer):
                 {
                     'type': 'file_message',
                     'chat_id': chat.chat_id,
+                    'message_id': msg.message_id,
                     'first_name': msg.sender.first_name,
                     'last_name': msg.sender.last_name,
                     'username': msg.sender.username,
                     'profile_pic': msg.sender.profile_pic.url,
                     'content': msg.content,
+                    'timestamp': str(msg.timestamp)
                 }
             )
         elif data['type'] == 'like_message':

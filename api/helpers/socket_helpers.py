@@ -49,7 +49,7 @@ def get_message(message_id):
     except:
         pass
     try:
-        x = DirectMessage.objects.get(chat_id=message_id)
+        x = DirectMessage.objects.get(message_id=message_id)
         return ("DirectMessage", x)
     except:
         raise Exception

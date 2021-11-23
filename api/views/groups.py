@@ -107,7 +107,7 @@ def chat_info(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def create_chat(request):
-    check_fields = ['name', 'description', 'lat', 'long', 'radius', 'image', 'radius']
+    check_fields = ['name', 'description', 'lat', 'long', 'radius', 'image']
     for required in check_fields:
         if required not in request.data:
             return Response(status=status.HTTP_400_BAD_REQUEST)

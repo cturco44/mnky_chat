@@ -36,10 +36,10 @@ class DirectChat(models.Model):
     def save(self, *args, **kwargs):
         while Chat.objects.filter(chat_id=self.chat_id).exists() and self.pk is None and DirectChat.objects.filter(chat_id=self.chat_id).exists():
             self.chat_id = unique_id()
-        super(Chat, self).save(*args, **kwargs)
+        super(DirectChat, self).save(*args, **kwargs)
     
     def __str__(self):
-        return self.user1.name + " " + self.user2.name
+        return self.user1.username + " " + self.user2.username
 
 class MemberOf(models.Model):
     chat = models.ForeignKey(Chat, on_delete=CASCADE)
@@ -59,7 +59,7 @@ class Message(models.Model):
     def save(self, *args, **kwargs):
         while Message.objects.filter(message_id=self.message_id).exists() and self.pk is None and DirectMessage.objects.filter(message_id=self.message_id):
             self.message_id = unique_id()
-        super(Chat, self).save(*args, **kwargs)
+        super(Message, self).save(*args, **kwargs)
 
 class DirectMessage(models.Model):
     message_id = models.CharField(primary_key=False, default=unique_id, max_length=10, editable=False, unique=True)
@@ -72,7 +72,7 @@ class DirectMessage(models.Model):
     def save(self, *args, **kwargs):
         while Message.objects.filter(message_id=self.message_id).exists() and self.pk is None and DirectMessage.objects.filter(message_id=self.message_id):
             self.message_id = unique_id()
-        super(Chat, self).save(*args, **kwargs)
+        super(DirectMessage, self).save(*args, **kwargs)
 
 class MessageLike(models.Model):
     message = models.ForeignKey(Message, on_delete=CASCADE)
