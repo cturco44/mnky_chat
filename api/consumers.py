@@ -33,7 +33,7 @@ class ChatConsumer(WebsocketConsumer):
                 self.channel_name
             )
     
-    def update(self):
+    def update(self, data):
         if not self.scope['user'].is_authenticated:
             return
         header_dict = {}
@@ -41,8 +41,8 @@ class ChatConsumer(WebsocketConsumer):
             header_dict[item[0]] = item[1]
         if b'lat' not in header_dict or b'long' not in header_dict:
             return
-        lat = float(header_dict[b'lat'].decode())
-        long = float(header_dict[b'long'].decode())
+        lat = float(data['lat'])
+        long = float(data['long'])
 
         added_chats, removed_chats, new_chat_set = active_chat_changes(self.scope['user'], lat, long, self.joined_chat_ids)
         for item in added_chats:
@@ -61,9 +61,10 @@ class ChatConsumer(WebsocketConsumer):
     def receive(self, text_data):
         if not self.scope['user'].is_authenticated:
             return
-        self.update()
-
         data = json.loads(text_data)
+        self.update(data)
+
+        
 
         if data['type'] == 'chat_message':
             type, chat = get_chat(data['chat_id'])
