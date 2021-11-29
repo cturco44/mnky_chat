@@ -325,7 +325,7 @@ def chat_log(request):
 @permission_classes([IsAuthenticated])
 def direct_message(request):
     try:
-        user = User.objects.filter(username=request.data["username"])
+        user = User.objects.get(username=request.data["username"])
     except:
         return Response({"error": "invalid username"}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -356,6 +356,34 @@ def leave_chat(request):
             chat.owner = other_users[0]
             chat.save()
     return Response({}, status.HTTP_200_OK)
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def upload_file(request):
+    try:
+        current_location = Point(float(request.data['long']), float(request.data['lat']), srid=4326)
+        chat = Chat.objects.get(chat_id=request.data['chat_id'], polygon__covers=current_location)
+        type = "Chat"
+    except:
+        try:
+            chat = DirectChat.objects.get(chat_id=request.data['chat_id'])
+            type = "DirectChat"
+        except:
+            return Response({"error": "invalid chat id"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if type == "Chat":
+        try:
+            MemberOf.objects.get(chat=chat, user=request.user)
+        except:
+             return Response(status=status.HTTP_403_FORBIDDEN)
+        msg = Message.objects.create(chat=chat, sender=request.user, file=request.data['file'])
+    else:
+        if chat.user1 != request.user and chat.user2 != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        msg = DirectMessage.objects.create(chat=chat, sender=request.user, file=request.data['file'])
+    
+    return Response({"message_id": msg.message_id}, status=200)
             
 
 
