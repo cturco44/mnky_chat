@@ -24,4 +24,6 @@ urlpatterns = [
     path('active-chats/', active_chats),
     path('chat-info/', chat_info),
     path('chat/', create_chat),
+    path('messages/', get_messages),
+    path('files/', get_files),
 ]

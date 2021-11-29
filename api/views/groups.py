@@ -186,12 +186,11 @@ def get_messages(request):
         chat = Chat.objects.get(chat_id=request.data['chat_id'], polygon__covers=current_location)
         type = "Chat"
     except:
-        pass
-    try:
-        chat = DirectChat.objects.get(chat_id=request.data['chat_id'])
-        type = "DirectChat"
-    except:
-        return Response({"error": "invalid chat id"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            chat = DirectChat.objects.get(chat_id=request.data['chat_id'])
+            type = "DirectChat"
+        except:
+            return Response({"error": "invalid chat id"}, status=status.HTTP_400_BAD_REQUEST)
     
     if type == "Chat":
         try:
@@ -219,20 +218,20 @@ def get_messages(request):
         if 'message_id' in request.data:
             try:
                 cutoff = DirectMessage.objects.get(message_id=request.data['message_id'])[:20]
-                query = Message.objects.filter(chat=chat, timestamp__lt=cutoff.timestamp).order_by('-timestamp')
+                query = DirectMessage.objects.filter(chat=chat, timestamp__lt=cutoff.timestamp).order_by('-timestamp')
             except:
                 return Response({"Error": "Invalid message id"}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            query = Message.objects.filter(chat=chat).order_by('-timestamp')[:20]
+            query = DirectMessage.objects.filter(chat=chat).order_by('-timestamp')[:20]
     
     message_list = []
     for message in query:
         likes = []
         if type == "Chat":
-            likes = MessageLike.objects.filter(message=message)
+            db_likes = MessageLike.objects.filter(message=message)
         else:
-            likes = DirectMessageLike.objects.filter(message=message)
-        for like in likes:
+            db_likes = DirectMessageLike.objects.filter(message=message)
+        for like in db_likes:
             likes.append({
                 "first_name": like.user.first_name,
                 "last_name": like.user.last_name,
@@ -253,6 +252,7 @@ def get_messages(request):
             "username": message.sender.username,
             "profile_pic": message.sender.profile_pic.url,
             "content": content,
+            "timestamp": str(message.timestamp),
             "likes": likes
         }
         message_list.append(x)
@@ -267,23 +267,22 @@ def get_files(request):
         chat = Chat.objects.get(chat_id=request.data['chat_id'], polygon__covers=current_location)
         type = "Chat"
     except:
-        pass
-    try:
-        chat = DirectChat.objects.get(chat_id=request.data['chat_id'])
-        type = "DirectChat"
-    except:
-        return Response({"error": "invalid chat id"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            chat = DirectChat.objects.get(chat_id=request.data['chat_id'])
+            type = "DirectChat"
+        except:
+            return Response({"error": "invalid chat id"}, status=status.HTTP_400_BAD_REQUEST)
     
     if type == "Chat":
         try:
             MemberOf.objects.get(chat=chat, user=request.user)
         except:
              return Response(status=status.HTTP_403_FORBIDDEN)
-        query = Message.objects.filter(chat=chat, file__isnull=False)
+        query = Message.objects.filter(chat=chat).filter(~Q(file__in=['',None]))
     else:
         if chat.user1 != request.user and chat.user2 != request.user:
             return Response(status=status.HTTP_403_FORBIDDEN)
-        query = DirectMessage.objects.filter(chat=chat, file__isnull=False)
+        query = DirectMessage.objects.filter(chat=chat).filter(~Q(file__in=['',None]))
     
     file_list = []
     for message in query:
