@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication])
 def active_chats(request):
     try:
         current_location = Point(float(request.data['long']), float(request.data['lat']), srid=4326)
@@ -36,12 +37,14 @@ def active_chats(request):
                 has_password_view_permission = True
         except:
             has_password_view_permission = False
-
         try:
             if chat.password and not has_password_view_permission:
                 recent_message_content = None
                 recent_message_timestamp = None
+                password = True
+
             else:
+                password = False
                 recent_message = Message.objects.filter(chat=chat, timestamp__isnull=False).latest('timestamp')
                 if recent_message.file:
                     recent_message = "FILE"
@@ -52,12 +55,18 @@ def active_chats(request):
             recent_message_content = None
             recent_message_timestamp = None
         
+
         x = {
             "chat_id": chat.chat_id,
             "name": chat.name,
             "description": chat.description,
+            "lat": chat.location[1],
+            "long": chat.location[0],
+            "radius": chat.radius,
+            "image": chat.image.url,
             "recent_message_content": recent_message_content,
-            "recent_message_timestamp": recent_message_timestamp
+            "recent_message_timestamp": recent_message_timestamp,
+            "require_password": password
         }
         return_data["active_chats"].append(x)
     
@@ -78,6 +87,7 @@ def active_chats(request):
             "first_name": other_user.first_name,
             "last_name": other_user.last_name,
             "username": other_user.username,
+            "profile_pic": other_user.profile_pic.url,
             "recent_message_content": recent_message_content,
             "recent_message_timestamp": recent_message_timestamp
         }
@@ -237,10 +247,11 @@ def get_messages(request):
             content = message.content
         x = {
             "type": message_type,
+            "message_id": message.message_id,
             "first_name": message.sender.first_name,
             "last_name": message.sender.last_name,
             "username": message.sender.username,
-            "profile_pic": message.sender.profile_pic,
+            "profile_pic": message.sender.profile_pic.url,
             "content": content,
             "likes": likes
         }

@@ -4,10 +4,17 @@ from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 
 import uuid
+import os
+from mnky_chat.settings import MEDIA_ROOT
 
 # ID Generation
 def unique_id():
     return uuid.uuid4().hex[:8].lower()
+
+def get_file_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
+    return filename
 
 class Chat(models.Model):
     chat_id = models.CharField(primary_key=False, default=unique_id, max_length=10, editable=False, unique=True)
@@ -52,8 +59,8 @@ class Message(models.Model):
     message_id = models.CharField(primary_key=False, default=unique_id, max_length=10, editable=False, unique=True)
     chat = models.ForeignKey(Chat, on_delete=CASCADE)
     sender = models.ForeignKey(User, on_delete=CASCADE)
-    content = models.TextField()
-    file = models.FileField(null=True, blank=True)
+    content = models.TextField(null=True, blank=True)
+    file = models.FileField(upload_to=get_file_path, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     
     def save(self, *args, **kwargs):
@@ -65,8 +72,8 @@ class DirectMessage(models.Model):
     message_id = models.CharField(primary_key=False, default=unique_id, max_length=10, editable=False, unique=True)
     chat = models.ForeignKey(DirectChat, on_delete=CASCADE)
     sender = models.ForeignKey(User, on_delete=CASCADE, related_name='sender')
-    content = models.TextField()
-    file = models.FileField(null=True, blank=True)
+    content = models.TextField(null=True, blank=True)
+    file = models.FileField(upload_to=get_file_path, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
