@@ -41,8 +41,7 @@ msgpack==1.0.2
 paramiko==2.8.1
 pathspec==0.5.9
 Pillow==8.4.0
-psycopg2==2.7.7
-psycopg2-binary==2.7.7
+psycopg2-binary==2.8.5
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.21
