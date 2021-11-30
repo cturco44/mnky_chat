@@ -30,4 +30,5 @@ urlpatterns = [
     path('direct-message/', direct_message),
     path('leave-chat/', leave_chat),
     path('upload-file/', upload_file),
+    path('create-chat/', create_chat),
 ]
