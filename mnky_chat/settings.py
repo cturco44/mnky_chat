@@ -89,7 +89,7 @@ WSGI_APPLICATION = 'mnky_chat.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'connorturco', 
         'USER': 'connorturco', 
         'PASSWORD': '',
@@ -157,5 +157,4 @@ CHANNEL_LAYERS = {
         },
     },
 }
-GDAL_LIBRARY_PATH = os.environ['GDAL_LIBRARY_PATH']
 

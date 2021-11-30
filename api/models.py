@@ -1,7 +1,6 @@
 from django.db.models.deletion import CASCADE
 from user.models import User
-from django.contrib.gis.db import models
-from django.contrib.gis.geos import Point
+from django.db import models
 
 import uuid
 import os
@@ -21,9 +20,9 @@ class Chat(models.Model):
     name = models.CharField(max_length=40)
     description = models.TextField()
     owner = models.ForeignKey(User, on_delete=CASCADE, null=True)
-    location = models.PointField(geography=True, default=Point(0,0))
+    lat = models.FloatField(default=0)
+    long = models.FloatField(default=0)
     radius = models.FloatField(default=5)
-    polygon = models.PolygonField(geography=True, null=True)
     password = models.CharField(max_length=50, null=True)
     image = models.ImageField(null=True)
 

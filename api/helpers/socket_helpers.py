@@ -1,9 +1,11 @@
 from api.models import MemberOf, DirectChat, Chat, Message, DirectMessage
 from django.db.models import Q
 from django.contrib.gis.geos import Point
+from api.helpers.distance import get_chats
 
 def all_active_chat_ids(user, lat, long):
-    all_groups = MemberOf.objects.filter(user=user, chat__polygon__covers=Point(long, lat))
+    all_groups = [i.pk for i in get_chats(lat, long)]
+    all_groups = MemberOf.objects.filter(user=user, chat__pk__in=all_groups)
     all_direct_chats = DirectChat.objects.filter(Q(user1=user) | Q(user2=user))
 
     return_list = set()

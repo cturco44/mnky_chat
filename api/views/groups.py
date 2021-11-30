@@ -6,19 +6,20 @@ from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from api.models import Chat, DirectChat, DirectMessageLike, MemberOf, Message, DirectMessage, MessageLike
-from django.contrib.gis.geos import Point
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from api.helpers.distance import get_chats
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 def active_chats(request):
     try:
-        current_location = Point(float(request.data['long']), float(request.data['lat']), srid=4326)
+        lat = float(request.data['long'])
+        long = float(request.data['lat'])
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
-    active_chats = Chat.objects.filter(polygon__covers=current_location)
+    active_chats = get_chats(lat, long)
     if request.user.is_authenticated:
         chat_query = DirectChat.objects.filter(Q(user1=request.user) | Q(user2=request.user))
         active_direct_chats = []
@@ -147,20 +148,18 @@ def create_chat(request):
     
     try:
         # Convert to poly object
-        radius_km = float(request.data['radius'])
-        point = Point(float(request.data['long']), float(request.data['lat']), srid=4326)
-        point.transform(6437)
-        poly = point.buffer(radius_km*1000)
-        poly.transform(4326)
+        radius = float(request.data['radius'])
+        lat = float(request.data['lat'])
+        long = float(request.data['long'])
 
         new_chat = Chat.objects.create(
             name=request.data["name"],
             description=request.data["description"],
             owner=request.user,
-            location=Point(float(request.data['long']), float(request.data['lat'])),
-            radius=float(request.data["radius"]),
+            lat=lat,
+            long=long,
+            radius=radius,
             image=request.data["image"],
-            polygon=poly,
         )
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -182,8 +181,11 @@ def create_chat(request):
 @permission_classes([IsAuthenticated])
 def get_messages(request):
     try:
-        current_location = Point(float(request.data['long']), float(request.data['lat']), srid=4326)
-        chat = Chat.objects.get(chat_id=request.data['chat_id'], polygon__covers=current_location)
+        lat = float(request.data['lat'])
+        long = float(request.data['long'])
+        x = Chat.objects.get(chat_id=request.data['chat_id'])
+        if not get_chats(lat, long, x):
+            raise Exception
         type = "Chat"
     except:
         try:
@@ -263,8 +265,12 @@ def get_messages(request):
 @permission_classes([IsAuthenticated])
 def get_files(request):
     try:
-        current_location = Point(float(request.data['long']), float(request.data['lat']), srid=4326)
-        chat = Chat.objects.get(chat_id=request.data['chat_id'], polygon__covers=current_location)
+        lat = float(request.data['lat'])
+        long = float(request.data['long'])
+
+        chat = Chat.objects.get(chat_id=request.data['chat_id'])
+        if not get_chats(lat, long, chat):
+            raise Exception
         type = "Chat"
     except:
         try:
@@ -297,11 +303,13 @@ def get_files(request):
 @permission_classes([IsAuthenticated])
 def chat_log(request):
     try:
-        current_location = Point(float(request.data['long']), float(request.data['lat']), srid=4326)
+        lat = float(request.data['lat'])
+        long = float(request.data['long'])
     except:
         return Response({"error": "invalid location"}, status=status.HTTP_400_BAD_REQUEST)
     
-    query = MemberOf.objects.filter(user=request.user).filter(~Q(chat__polygon__covers=current_location))
+    active_chats = [i.pk for i in get_chats(lat, long)]
+    query = MemberOf.objects.filter(user=request.user).exclude(chat__pk__in=active_chats)
 
     chat_log = []
     for item in query:
@@ -362,8 +370,11 @@ def leave_chat(request):
 @permission_classes([IsAuthenticated])
 def upload_file(request):
     try:
-        current_location = Point(float(request.data['long']), float(request.data['lat']), srid=4326)
-        chat = Chat.objects.get(chat_id=request.data['chat_id'], polygon__covers=current_location)
+        lat = float(request.data['lat'])
+        long = float(request.data['long'])
+        chat = Chat.objects.get(chat_id=request.data['chat_id'])
+        if not get_chats(lat, long, chat):
+            raise Exception
         type = "Chat"
     except:
         try:
