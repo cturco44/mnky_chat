@@ -169,8 +169,8 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+           "hosts": [('django-channels-redis.j4caak.ng.0001.use1.cache.amazonaws.com:6379', 6379)]
         },
-    },
+    }
 }
 

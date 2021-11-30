@@ -1,0 +1,89 @@
+files:
+    "/etc/supervisord.conf":
+        mode: "000755"
+        owner: root
+        group: root
+        content: |
+            [unix_http_server]
+            file=/tmp/supervisor.sock   ; (the path to the socket file)
+
+            [supervisord]
+            logfile=/tmp/supervisord.log ; (main log file;default $CWD/supervisord.log)
+            logfile_maxbytes=50MB        ; (max main logfile bytes b4 rotation;default 50MB)
+            logfile_backups=10           ; (num of main logfile rotation backups;default 10)
+            loglevel=info                ; (log level;default info; others: debug,warn,trace)
+            pidfile=/tmp/supervisord.pid ; (supervisord pidfile;default supervisord.pid)
+            nodaemon=false               ; (start in foreground if true;default false)
+            minfds=1024                  ; (min. avail startup file descriptors;default 1024)
+            minprocs=200                 ; (min. avail process descriptors;default 200)
+            environment=SYMFONY_ENV=prod
+
+            [rpcinterface:supervisor]
+            supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+            [supervisorctl]
+            serverurl=unix:///tmp/supervisor.sock ; use a unix:// URL  for a unix socket
+
+            [include]
+            files = /etc/supervisor/conf.d/*.conf
+
+            [inet_http_server]
+            port = 9000
+            username = user
+            password = pwfiles:
+    "/etc/supervisor/conf.d/laravel-worker.conf":
+        mode: "000755"
+        owner: root
+        group: root
+        content: |
+            [program:laravel-worker]
+            process_name=%(program_name)s_%(process_num)02d
+            command=php /var/www/html/artisan queue:work --sleep=3 --tries=3 --daemon
+            autostart=true
+            autorestart=true
+            numprocs=3
+            redirect_stderr=true
+            stderr_logfile=/var/www/html/storage/logs/worker.err.log
+            stdout_logfile=/var/www/html/storage/logs/worker.out.log
+    "/opt/elasticbeanstalk/hooks/appdeploy/pre/490-supervisor_install.sh":
+        mode: "000755"
+        owner: root
+        group: root
+        content: |
+            #!/usr/bin/env bash
+            . /opt/elasticbeanstalk/support/envvars
+
+            if [ ! -f /usr/local/bin/supervisord ]; then
+                echo "install supervisor and create directories"
+                easy_install supervisor
+            else
+                echo "supervisor already installed"
+            fi
+
+            if [ ! -d /etc/supervisor ]; then
+                mkdir /etc/supervisor
+                echo "create supervisor directory"
+            fi
+
+            if [ ! -d /etc/supervisor/conf.d ]; then
+                mkdir /etc/supervisor/conf.d
+                echo "create supervisor configs directory"
+            fi
+    "/opt/elasticbeanstalk/hooks/appdeploy/post/500-supervisor_update.sh":
+        mode: "000755"
+        owner: root
+        group: root
+        content: |
+            #!/usr/bin/env bash
+            . /opt/elasticbeanstalk/support/envvars
+
+            if ps aux | grep -q "[/]usr/local/bin/supervisord"; then
+            echo "supervisor is running"
+            else
+            echo "start supervisor"
+            /usr/bin/python /usr/local/bin/supervisord --pidfile /var/run/supervisord.pid
+            fi
+
+            /usr/local/bin/supervisorctl reread
+            /usr/local/bin/supervisorctl update
+            /usr/local/bin/supervisorctl restart laravel-worker:*
