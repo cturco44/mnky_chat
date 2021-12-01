@@ -40,7 +40,7 @@ SECRET_KEY = 'django-insecure-n%w0y3@j5bi!)lg6)6mw5l@p@euj2iw1y&+7yebad&dkhf8xb_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['mnky-chat-new2.us-east-1.elasticbeanstalk.com', '127.0.0.1', 'mnky-chat-fix-sockets.us-east-1.elasticbeanstalk.com']
+ALLOWED_HOSTS = ['mnky-chat-new2.us-east-1.elasticbeanstalk.com', '127.0.0.1', 'mnky-chat-fix-sockets.us-east-1.elasticbeanstalk.com', '35.2.38.165']
 
 
 # Application definition
@@ -114,7 +114,7 @@ else:
             'USER': 'connorturco', 
             'PASSWORD': '',
             'HOST': '127.0.0.1', 
-            'PORT': '5432',
+            'PORT': '5433',
         }
     }
 

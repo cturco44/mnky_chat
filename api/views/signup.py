@@ -7,7 +7,7 @@ from rest_framework.authtoken.models import Token
 
 @api_view(['POST'])
 def sign_up(request):
-    check_fields = ['username', 'password', 'first_name', 'last_name', 'profile_pic', 'email']
+    check_fields = ['username', 'password', 'first_name', 'last_name', 'email']
     for item in check_fields:
         if item not in request.data:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -19,7 +19,6 @@ def sign_up(request):
             password=request.data["password"],
             first_name=request.data["first_name"],
             last_name=request.data["last_name"],
-            profile_pic=request.data["profile_pic"],
             )
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
