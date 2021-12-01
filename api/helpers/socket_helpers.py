@@ -1,6 +1,5 @@
 from api.models import MemberOf, DirectChat, Chat, Message, DirectMessage
 from django.db.models import Q
-from django.contrib.gis.geos import Point
 from api.helpers.distance import get_chats
 
 def all_active_chat_ids(user, lat, long):
