@@ -14,8 +14,8 @@ from api.helpers.distance import get_chats
 @authentication_classes([TokenAuthentication])
 def active_chats(request):
     try:
-        lat = float(request.data['long'])
-        long = float(request.data['lat'])
+        lat = float(request.GET['lat'])
+        long = float(request.GET['long'])
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
@@ -61,8 +61,8 @@ def active_chats(request):
             "chat_id": chat.chat_id,
             "name": chat.name,
             "description": chat.description,
-            "lat": chat.location[1],
-            "long": chat.location[0],
+            "lat": chat.lat,
+            "long": chat.long,
             "radius": chat.radius,
             "image": chat.image.url,
             "recent_message_content": recent_message_content,

@@ -7,7 +7,7 @@ def get_chats(lat, long, initial_query=Chat.objects.all()):
         chat_coord = (chat.lat, chat.long)
         person_coord = (lat, long)
 
-        if geopy.distance.vincenty(chat_coord, person_coord).miles < chat.radius:
+        if geopy.distance.geodesic(chat_coord, person_coord).miles < chat.radius:
             in_range.append(chat)
     
     return in_range
