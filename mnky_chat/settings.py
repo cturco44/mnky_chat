@@ -16,12 +16,19 @@ import os
 if 'AWS_ACCESS_KEY_ID' in os.environ:
     AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+            "hosts": [('django-channels-redis.j4caak.ng.0001.use1.cache.amazonaws.com:6379', 6379)]
+            },
+        }
+    }
+    ### Django storages - use in production
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# env = environ.Env()
-# environ.Env.read_env()
 
 
 # Quick-start development settings - unsuitable for production
@@ -153,8 +160,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-### Django storages - use in production
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -165,12 +171,5 @@ AUTH_USER_MODEL = 'user.User'
 
 ASGI_APPLICATION = "mnky_chat.asgi.application"
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-           "hosts": [('django-channels-redis.j4caak.ng.0001.use1.cache.amazonaws.com:6379', 6379)]
-        },
-    }
-}
+
 
