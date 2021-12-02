@@ -7,7 +7,7 @@ systemenv=`echo $systemenv | sed 's/,/",/g' | sed 's/=/="/g'`
 systemenv="$systemenv\""
 
 # Get Django environment variables, comment if not using python-dotenv
-djangoenv=`cat /opt/elasticbeanstalk/deployment/django_env_var | tr '\n' ',' | sed 's/%/%%/g' | sed 's/export //g'`
+#djangoenv=`cat /opt/elasticbeanstalk/deployment/django_env_var | tr '\n' ',' | sed 's/%/%%/g' | sed 's/export //g'`
 allenv="$systemenv,$djangoenv"
 
 # Create daemon configuration script
