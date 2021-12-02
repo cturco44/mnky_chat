@@ -13,7 +13,7 @@ import api.routing
 
 
 application = ProtocolTypeRouter({
-#   "http": agsi_routes,
+  "http": agsi_routes,
   "websocket": TokenAuthMiddlewareStack(
         URLRouter(
             api.routing.websocket_urlpatterns
