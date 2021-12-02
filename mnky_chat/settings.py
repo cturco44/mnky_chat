@@ -26,15 +26,15 @@ if 'AWS_ACCESS_KEY_ID' in os.environ:
     }
     ### Django storages - use in production
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
+    
 CHANNEL_LAYERS = {
-        'default': {
-            'BACKEND': 'channels_redis.core.RedisChannelLayer',
-            'CONFIG': {
-            "hosts": [('django-channels-redis.j4caak.ng.0001.use1.cache.amazonaws.com:6379', 6379)]
-            },
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+        "hosts": [('django-channels-redis.j4caak.ng.0001.use1.cache.amazonaws.com:6379', 6379)]
+        },
+    }
 }
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
