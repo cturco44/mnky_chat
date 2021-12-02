@@ -8,11 +8,11 @@ systemenv="$systemenv\""
 
 # Get Django environment variables, comment if not using python-dotenv
 #djangoenv=`cat /opt/elasticbeanstalk/deployment/django_env_var | tr '\n' ',' | sed 's/%/%%/g' | sed 's/export //g'`
-#allenv="$systemenv,$djangoenv"
+allenv="$systemenv,$djangoenv"
 
 # Create daemon configuration script
 daemonconf="[program:daphne]
-command=daphne -b :: -p 5000 <Django Root App>.asgi:application
+command=daphne -b :: -p 5000 mnky_chat.asgi:application
 
 directory=/var/app
 user=ec2-user
