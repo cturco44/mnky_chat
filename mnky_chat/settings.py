@@ -104,7 +104,7 @@ else:
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'mnky_chat', 
-            'USER': 'connorturco', 
+            'USER': 'robertmanning', 
             'PASSWORD': '',
             'HOST': '127.0.0.1', 
             'PORT': '5432',
@@ -154,7 +154,7 @@ MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 ### Django storages - use in production
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+#DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

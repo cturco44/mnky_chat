@@ -14,11 +14,10 @@ from api.helpers.distance import get_chats
 @authentication_classes([TokenAuthentication])
 def active_chats(request):
     try:
-        lat = float(request.data['long'])
-        long = float(request.data['lat'])
+        lat = float(request.query_params['long'])
+        long = float(request.query_params['lat'])
     except:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-    
+        return Response(status=status.HTTP_400_BAD_REQUES)
     active_chats = get_chats(lat, long)
     if request.user.is_authenticated:
         chat_query = DirectChat.objects.filter(Q(user1=request.user) | Q(user2=request.user))
@@ -61,13 +60,13 @@ def active_chats(request):
             "chat_id": chat.chat_id,
             "name": chat.name,
             "description": chat.description,
-            "lat": chat.location[1],
-            "long": chat.location[0],
+            "lat": 0.0,
+            "long": 0.0,
             "radius": chat.radius,
             "image": chat.image.url,
             "recent_message_content": recent_message_content,
             "recent_message_timestamp": recent_message_timestamp,
-            "require_password": password
+            "require_password": False
         }
         return_data["active_chats"].append(x)
     
@@ -95,7 +94,7 @@ def active_chats(request):
         return_data["active_chats"].append(x)
     
     return_data["active_chats"] = sorted(return_data["active_chats"], key=lambda x: (x['recent_message_timestamp'] is None, x['recent_message_timestamp']), reverse=True)
-
+    print(return_data)
     return Response(return_data, status.HTTP_200_OK)
 
 @api_view(['GET'])
@@ -180,18 +179,27 @@ def create_chat(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def get_messages(request):
+    print(request.query_params)
     try:
-        lat = float(request.data['lat'])
-        long = float(request.data['long'])
-        x = Chat.objects.get(chat_id=request.data['chat_id'])
+        print("HERE")
+        lat = float(request.query_params['lat'])
+        long = float(request.query_params['long'])
+        print(lat)
+        x = Chat.objects.filter(chat_id=request.query_params['chat_id'])
+        if len(x) != 1:
+            raise Exception
+        print(x)
         if not get_chats(lat, long, x):
             raise Exception
+        print("TEST")
+        chat = x[0]
         type = "Chat"
     except:
         try:
-            chat = DirectChat.objects.get(chat_id=request.data['chat_id'])
+            chat = DirectChat.objects.get(chat_id=request.query_params['chat_id'])
             type = "DirectChat"
         except:
+            print("RUHROH")
             return Response({"error": "invalid chat id"}, status=status.HTTP_400_BAD_REQUEST)
     
     if type == "Chat":
@@ -303,8 +311,8 @@ def get_files(request):
 @permission_classes([IsAuthenticated])
 def chat_log(request):
     try:
-        lat = float(request.data['lat'])
-        long = float(request.data['long'])
+        lat = float(request.query_params['lat'])
+        long = float(request.query_params['long'])
     except:
         return Response({"error": "invalid location"}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -313,11 +321,14 @@ def chat_log(request):
 
     chat_log = []
     for item in query:
-        most_recent_message = Message.objects.filter(chat=item.chat).latest('timestamp')
+        try:
+            timestamp = Message.objects.filter(chat=item.chat).latest('timestamp').timestamp
+        except:
+            timestamp = None
         chat_log.append({
             "name": item.chat.name,
             "image": item.chat.image.url,
-            "timestamp": most_recent_message.timestamp
+            "timestamp": timestamp
         })
     
     chat_log = sorted(chat_log, key=lambda x: (x['timestamp'] is None, x['timestamp']), reverse=True)
