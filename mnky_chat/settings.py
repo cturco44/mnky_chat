@@ -40,7 +40,7 @@ SECRET_KEY = 'django-insecure-n%w0y3@j5bi!)lg6)6mw5l@p@euj2iw1y&+7yebad&dkhf8xb_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['mkny-chat-new-settings.us-east-1.elasticbeanstalk.com','35.2.13.232', '127.0.0.1', '172.31.37.2']
+ALLOWED_HOSTS = ['mkny-chat-new-settings.us-east-1.elasticbeanstalk.com','35.2.13.232', '127.0.0.1', '172.31.37.2', '172.31.12.212', 'mnky-chat-fix-script.us-east-1.elasticbeanstalk.com']
 
 
 # Application definition
