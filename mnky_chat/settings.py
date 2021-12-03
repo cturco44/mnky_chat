@@ -24,6 +24,9 @@ if 'AWS_ACCESS_KEY_ID' in os.environ:
             },
         }
     }
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    
     ### Django storages - use in production
     
     
@@ -35,7 +38,7 @@ CHANNEL_LAYERS = {
         },
     }
 }
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
