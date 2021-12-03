@@ -25,7 +25,7 @@ if 'AWS_ACCESS_KEY_ID' in os.environ:
         }
     }
     ### Django storages - use in production
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    
     
 CHANNEL_LAYERS = {
     'default': {
@@ -35,6 +35,7 @@ CHANNEL_LAYERS = {
         },
     }
 }
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -114,17 +115,17 @@ if 'RDS_DB_NAME' in os.environ:
             'PORT': os.environ['RDS_PORT'],
         }
     }
-# else:
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#             'NAME': 'mnky_chat', 
-#             'USER': 'connorturco', 
-#             'PASSWORD': '',
-#             'HOST': '127.0.0.1', 
-#             'PORT': '5433',
-#         }
-#     }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'mnky_chat', 
+            'USER': 'connorturco', 
+            'PASSWORD': '',
+            'HOST': '127.0.0.1', 
+            'PORT': '5433',
+        }
+    }
 
 
 # Password validation
