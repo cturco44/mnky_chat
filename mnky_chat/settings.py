@@ -17,6 +17,8 @@ if 'AWS_ACCESS_KEY_ID' in os.environ:
     AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
     AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
     CHANNEL_LAYERS = {
         'default': {
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -25,17 +27,17 @@ if 'AWS_ACCESS_KEY_ID' in os.environ:
             },
         }
     }
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+    DEFAULT_FILE_STORAGE = 'storage_backends.PublicMediaStorage'
+    STATICFILES_STORAGE = 'storage_backends.StaticStorage'
 
-    AWS_LOCATION = 'static/'
     AWS_DEFAULT_ACL = 'public-read'
-    S3_URL = 'http://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
-    STATIC_URL = S3_URL
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
     DEBUG = False
 else:
     DEBUG = True
     STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
 
     ### Django storages - use in production
     
@@ -177,7 +179,6 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
 
 
 
