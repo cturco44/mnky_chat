@@ -26,6 +26,9 @@ if 'AWS_ACCESS_KEY_ID' in os.environ:
     }
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+    DEBUG = False
+else:
+    DEBUG = True
 
     ### Django storages - use in production
     
@@ -47,9 +50,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-n%w0y3@j5bi!)lg6)6mw5l@p@euj2iw1y&+7yebad&dkhf8xb_'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = ['52.3.3.112','172.31.33.156','172.31.33.156','mnky-chat-script2.us-east-1.elasticbeanstalk.com','mkny-chat-new-settings.us-east-1.elasticbeanstalk.com','35.2.13.232', '127.0.0.1', '172.31.37.2', '172.31.12.212', 'mnky-chat-fix-script.us-east-1.elasticbeanstalk.com']
 
