@@ -51,7 +51,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = CharField(max_length=25, unique=True)
     first_name = CharField(max_length=70)
     last_name = CharField(max_length=70)
-    profile_pic = models.ImageField(null=True, blank=True, default='default-profile.png')
+    profile_pic = models.ImageField(null=True, blank=True)
 
     
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
