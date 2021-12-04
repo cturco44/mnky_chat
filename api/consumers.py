@@ -7,22 +7,22 @@ from api.models import Message, DirectMessage, MessageLike, DirectMessageLike
 
 class ChatConsumer(WebsocketConsumer):
     def connect(self):
-        # if not self.scope['user'].is_authenticated:
-        #     return
-        # header_dict = {}
-        # for item in self.scope['headers']:
-        #     header_dict[item[0]] = item[1]
-        # if b'lat' not in header_dict or b'long' not in header_dict:
-        #     return
-        # lat = float(header_dict[b'lat'].decode())
-        # long = float(header_dict[b'long'].decode())
-        # self.joined_chat_ids = all_active_chat_ids(self.scope['user'], lat, long)
+        if not self.scope['user'].is_authenticated:
+            return
+        header_dict = {}
+        for item in self.scope['headers']:
+            header_dict[item[0]] = item[1]
+        if b'lat' not in header_dict or b'long' not in header_dict:
+            return
+        lat = float(header_dict[b'lat'].decode())
+        long = float(header_dict[b'long'].decode())
+        self.joined_chat_ids = all_active_chat_ids(self.scope['user'], lat, long)
 
-        # for chat_id in self.joined_chat_ids:
-        #     async_to_sync(self.channel_layer.group_add)(
-        #         chat_id,
-        #         self.channel_name
-        #     )
+        for chat_id in self.joined_chat_ids:
+            async_to_sync(self.channel_layer.group_add)(
+                chat_id,
+                self.channel_name
+            )
 
         self.accept()
 
