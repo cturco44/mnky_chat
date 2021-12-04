@@ -35,14 +35,6 @@ if 'AWS_ACCESS_KEY_ID' in os.environ:
     AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
-    CHANNEL_LAYERS = {
-        'default': {
-            'BACKEND': 'channels_redis.core.RedisChannelLayer',
-            'CONFIG': {
-            "hosts": [('django-channels-redis.j4caak.ng.0001.use1.cache.amazonaws.com:6379', 6379)]
-            },
-        }
-    }
     DEFAULT_FILE_STORAGE = 'storage_backends.PublicMediaStorage'
     STATICFILES_STORAGE = 'storage_backends.StaticStorage'
 
@@ -54,6 +46,15 @@ else:
     DEBUG = True
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+        "hosts": [('django-channels-redis.j4caak.ng.0001.use1.cache.amazonaws.com:6379', 6379)]
+        },
+    }
+}
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
