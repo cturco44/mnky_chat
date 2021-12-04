@@ -25,8 +25,8 @@ if 'AWS_ACCESS_KEY_ID' in os.environ:
         }
     }
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+
     ### Django storages - use in production
     
     
