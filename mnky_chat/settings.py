@@ -42,12 +42,7 @@ if 'AWS_ACCESS_KEY_ID' in os.environ:
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
     DEBUG = False
-else:
-    DEBUG = True
-    STATIC_URL = '/static/'
-    MEDIA_URL = '/media/'
-
-CHANNEL_LAYERS = {
+    CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
@@ -55,6 +50,11 @@ CHANNEL_LAYERS = {
         },
     }
 }
+else:
+    DEBUG = True
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
