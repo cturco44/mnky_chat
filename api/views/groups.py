@@ -14,8 +14,8 @@ from api.helpers.distance import get_chats
 @authentication_classes([TokenAuthentication])
 def active_chats(request):
     try:
-        lat = float(request.GET['lat'])
-        long = float(request.GET['long'])
+        lat = float(request.query_params['lat'])
+        long = float(request.query_params['long'])
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
@@ -181,15 +181,19 @@ def create_chat(request):
 @permission_classes([IsAuthenticated])
 def get_messages(request):
     try:
-        lat = float(request.data['lat'])
-        long = float(request.data['long'])
-        x = Chat.objects.get(chat_id=request.data['chat_id'])
+        lat = float(request.query_params['lat'])
+        long = float(request.query_params['long'])
+        x = Chat.objects.get(chat_id=request.query_params['chat_id'])
+        if len(x) != 1:
+            raise Exception
         if not get_chats(lat, long, x):
             raise Exception
+        
+        chat = x[0]
         type = "Chat"
     except:
         try:
-            chat = DirectChat.objects.get(chat_id=request.data['chat_id'])
+            chat = DirectChat.objects.get(chat_id=request.query_params['chat_id'])
             type = "DirectChat"
         except:
             return Response({"error": "invalid chat id"}, status=status.HTTP_400_BAD_REQUEST)
@@ -303,8 +307,8 @@ def get_files(request):
 @permission_classes([IsAuthenticated])
 def chat_log(request):
     try:
-        lat = float(request.data['lat'])
-        long = float(request.data['long'])
+        lat = float(request.query_params['lat'])
+        long = float(request.query_params['long'])
     except:
         return Response({"error": "invalid location"}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -313,11 +317,14 @@ def chat_log(request):
 
     chat_log = []
     for item in query:
-        most_recent_message = Message.objects.filter(chat=item.chat).latest('timestamp')
+        try:
+            timestamp = Message.objects.filter(chat=item.chat).latest('timestamp').timestamp
+        except:
+            timestamp = None
         chat_log.append({
             "name": item.chat.name,
             "image": item.chat.image.url,
-            "timestamp": most_recent_message.timestamp
+            "timestamp": timestamp
         })
     
     chat_log = sorted(chat_log, key=lambda x: (x['timestamp'] is None, x['timestamp']), reverse=True)
