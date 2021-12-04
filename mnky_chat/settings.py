@@ -43,17 +43,18 @@ if 'AWS_ACCESS_KEY_ID' in os.environ:
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
     DEBUG = False
     CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-        "hosts": [('django-channels-redis.j4caak.ng.0001.use1.cache.amazonaws.com', 6379)]
-        },
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+            "hosts": [('django-channels-redis.j4caak.ng.0001.use1.cache.amazonaws.com', 6379)]
+            },
+        }
     }
-}
 else:
     DEBUG = True
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
+
 
 
 
