@@ -24,7 +24,7 @@ class Chat(models.Model):
     long = models.FloatField(default=0)
     radius = models.FloatField(default=5)
     password = models.CharField(max_length=50, null=True)
-    image = models.ImageField(null=True)
+    image = models.ImageField(null=True, upload_to=get_file_path)
 
     def save(self, *args, **kwargs):
         while Chat.objects.filter(chat_id=self.chat_id).exists() and self.pk is None and DirectChat.objects.filter(chat_id=self.chat_id):

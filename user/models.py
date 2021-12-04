@@ -9,6 +9,10 @@ from django.db.models.fields import CharField
 import uuid
 from django.dispatch import receiver
 
+def get_file_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
+    return filename
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, username, first_name, last_name, password):
@@ -51,7 +55,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = CharField(max_length=25, unique=True)
     first_name = CharField(max_length=70)
     last_name = CharField(max_length=70)
-    profile_pic = models.ImageField(null=True, blank=True)
+    profile_pic = models.ImageField(null=True, blank=True, default='default-profile.png', upload_to=get_file_path)
 
     
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
