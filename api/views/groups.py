@@ -9,6 +9,8 @@ from api.models import Chat, DirectChat, DirectMessageLike, MemberOf, Message, D
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from api.helpers.distance import get_chats
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
@@ -183,7 +185,7 @@ def get_messages(request):
     try:
         lat = float(request.query_params['lat'])
         long = float(request.query_params['long'])
-        x = Chat.objects.get(chat_id=request.query_params['chat_id'])
+        x = Chat.objects.filter(chat_id=request.query_params['chat_id'])
         if len(x) != 1:
             raise Exception
         if not get_chats(lat, long, x):
@@ -379,9 +381,12 @@ def upload_file(request):
     try:
         lat = float(request.data['lat'])
         long = float(request.data['long'])
-        chat = Chat.objects.get(chat_id=request.data['chat_id'])
+        chat = Chat.objects.filter(chat_id=request.data['chat_id'])
+        if len(chat) != 1:
+            raise Exception
         if not get_chats(lat, long, chat):
             raise Exception
+        chat = chat[0]
         type = "Chat"
     except:
         try:
@@ -401,12 +406,34 @@ def upload_file(request):
             return Response(status=status.HTTP_403_FORBIDDEN)
         msg = DirectMessage.objects.create(chat=chat, sender=request.user, file=request.data['file'])
     
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(msg.chat.chat_id,
+        {
+            'type': 'file_message',
+            'chat_id': chat.chat_id,
+            'message_id': msg.message_id,
+            'first_name': msg.sender.first_name,
+            'last_name': msg.sender.last_name,
+            'username': msg.sender.username,
+            'profile_pic': msg.sender.profile_pic.url,
+            'content': msg.file.url,
+            'timestamp': str(msg.timestamp)
+        }
+    )
+
     return Response({"message_id": msg.message_id}, status=200)
             
-
-
-
-
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def user_info(request):
+    x = {
+        "username": request.user.username,
+        "email": request.user.email,
+        "first_name": request.user.first_name,
+        "last_name": request.user.last_name,
+    }
+    return Response(x, status=200)
 
 
 

@@ -4,6 +4,7 @@ from user.models import User
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 
 @api_view(['POST'])
 def sign_up(request):
@@ -29,5 +30,4 @@ def sign_up(request):
         user.staff = True
         user.save()
     token = Token.objects.get_or_create(user=user)[0].key
-    return Response({"token": token}, status.HTTP_200_OK)
-    
+    return Response({"token": token, "username": user.username, "email": user.email}, status.HTTP_200_OK)

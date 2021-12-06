@@ -23,7 +23,7 @@ class Chat(models.Model):
     lat = models.FloatField(default=0)
     long = models.FloatField(default=0)
     radius = models.FloatField(default=5)
-    password = models.CharField(max_length=50, null=True)
+    password = models.CharField(max_length=50, null=True, blank=True)
     image = models.ImageField(null=True, upload_to=get_file_path)
 
     def save(self, *args, **kwargs):
