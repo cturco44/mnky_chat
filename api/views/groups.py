@@ -441,7 +441,7 @@ def user_info(request):
 def chat_pic(request):
     user = request.user
     if "chat_id" not in request.data or "img" not in request.data:
-        return Response({"error": "pass a chat_id and profile pic"})
+        return Response({"error": "pass a chat_id and profile pic"}, status=400)
     chat = get_object_or_404(Chat, chat_id=request.data["chat_id"])
     if chat.owner != user:
         return Response(status=status.HTTP_403_FORBIDDEN)
