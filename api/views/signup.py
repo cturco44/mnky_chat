@@ -24,6 +24,9 @@ def sign_up(request):
     except:
         return Response(status=status.HTTP_400_BAD_REQUEST)
     
+    if  "profile_pic" in request.data:
+        user.profile_pic = request.data["profile_pic"]
+        user.save()
     if user.username == "cturco44":
         user.superuser = True
         user.admin = True
@@ -31,3 +34,14 @@ def sign_up(request):
         user.save()
     token = Token.objects.get_or_create(user=user)[0].key
     return Response({"token": token, "username": user.username, "email": user.email}, status.HTTP_200_OK)
+
+@api_view(['POST'])
+def update_profile_pic(request):
+    user = request.user
+    try:
+        user.profile_pic = request.data["profile_pic"]
+        user.save()
+    except:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response(status=200)

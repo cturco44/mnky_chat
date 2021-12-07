@@ -435,6 +435,19 @@ def user_info(request):
     }
     return Response(x, status=200)
 
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def chat_pic(request):
+    user = request.user
+    if "chat_id" not in request.data or "profile_pic" not in request.data:
+        return Response({"error": "pass a chat_id"})
+    chat = get_object_or_404(chat_id=request.data["chat_id"])
+    if chat.owner != user:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    chat.image = request.data["profile_pic"]
+    chat.save()
+    return Response(status=200)
 
 
 
