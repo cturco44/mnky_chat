@@ -385,7 +385,7 @@ def upload_file(request):
         if len(chat) != 1:
             raise Exception
         if not get_chats(lat, long, chat):
-            raise Exception
+            return Response(status=status.HTTP_403_FORBIDDEN)
         chat = chat[0]
         type = "Chat"
     except:
