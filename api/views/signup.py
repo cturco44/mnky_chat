@@ -4,7 +4,9 @@ from user.models import User
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
 @api_view(['POST'])
 def sign_up(request):
@@ -36,6 +38,8 @@ def sign_up(request):
     return Response({"token": token, "username": user.username, "email": user.email}, status.HTTP_200_OK)
 
 @api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def update_profile_pic(request):
     user = request.user
     try:

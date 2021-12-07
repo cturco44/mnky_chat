@@ -15,7 +15,7 @@ Including another URLconf
 """
 from rest_framework.authtoken import views
 from django.urls import path
-from .views.signup import sign_up
+from .views.signup import sign_up, update_profile_pic
 from .views.groups import *
 
 urlpatterns = [
@@ -32,4 +32,6 @@ urlpatterns = [
     path('upload-file/', upload_file),
     path('create-chat/', create_chat),
     path('user-info/', user_info),
+    path('profile-pic/', update_profile_pic),
+    path('chat-image/', chat_pic),
 ]
