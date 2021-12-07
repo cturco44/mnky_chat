@@ -1,7 +1,7 @@
 import geopy.distance
 from api.models import Chat
 
-def get_chats(lat, long, initial_query=Chat.objects.all()):
+def get_chats(lat, long, initial_query=Chat.objects.filter()):
     in_range = []
     for chat in initial_query:
         chat_coord = (chat.lat, chat.long)
