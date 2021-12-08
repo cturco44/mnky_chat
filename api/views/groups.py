@@ -105,7 +105,7 @@ def active_chats(request):
 @permission_classes([IsAuthenticated])
 def chat_info(request):
     try:
-        chat_id = request.data['chat_id']
+        chat_id = request.query_params['chat_id']
     except:
         Response(status=status.HTTP_400_BAD_REQUEST)
     
