@@ -135,6 +135,7 @@ def chat_info(request):
         "chat_id": chat.chat_id,
         "name": chat.name,
         "description": chat.description,
+        "image": chat.image.url,
         "users": user_list,
     }
     return Response(return_dict, status=status.HTTP_200_OK)
